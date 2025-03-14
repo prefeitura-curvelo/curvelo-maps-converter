@@ -55,7 +55,7 @@ def upsert_resource(api_token, filepath, resource_id=''):
 
 def convert_shape_to_geojson(shapefile):
     d = geopandas.read_file(shapefile)
-    
+    d = d.set_crs("EPSG:31983") 
     new_projection = d.to_crs("EPSG:4326")
     new_filename = shapefile.split('/')[-1].replace('shp', 'geojson')
     new_projection.to_file(new_filename, driver="GeoJSON")
@@ -65,7 +65,7 @@ def convert_shape_to_geojson(shapefile):
 # O diretório onde os arquivos .shp estão localizados
 dirpath = sys.argv[1]
 
-for filename, resource_id in layers.items():
+for filename, resource_id in LAYERS.items():
     filepath = os.path.join(dirpath, filename)
     new_file = convert_shape_to_geojson(filepath)
     upsert_resource(api_token, new_file, resource_id=resource_id)
