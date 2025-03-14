@@ -2,4 +2,4 @@
 
 Instale as dependências:
 
-> python main.py shapefile_path.shp
+> python main.py diretorio-com-shapefiles/
