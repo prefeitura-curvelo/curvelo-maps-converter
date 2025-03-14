@@ -19,6 +19,7 @@ logger.setLevel(logging.INFO)
 config = dotenv_values(".env")
 api_token = config["CKAN_API_KEY"]
 ckan_api_url = config["CKAN_API_URL"]
+maps_folder_path = config["MAPS_FOLDER_PATH"]
 
 LAYERS = {
     "Macrozoneamento.shp": "fe906a2a-a40f-4992-bcf3-bfb10935ecc6", 
@@ -58,14 +59,11 @@ def convert_shape_to_geojson(shapefile):
     d = d.set_crs("EPSG:31983") 
     new_projection = d.to_crs("EPSG:4326")
     new_filename = shapefile.split('/')[-1].replace('shp', 'geojson')
-    new_projection.to_file(new_filename, driver="GeoJSON")
-    return new_filename
-
-
-# O diretório onde os arquivos .shp estão localizados
-dirpath = sys.argv[1]
+    new_filepath = os.path.join("/tmp", new_filename)
+    new_projection.to_file(new_filepath, driver="GeoJSON")
+    return new_filepath
 
 for filename, resource_id in LAYERS.items():
-    filepath = os.path.join(dirpath, filename)
+    filepath = os.path.join(maps_folder_path, filename)
     new_file = convert_shape_to_geojson(filepath)
     upsert_resource(api_token, new_file, resource_id=resource_id)
