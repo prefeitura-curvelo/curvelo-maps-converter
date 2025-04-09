@@ -54,16 +54,29 @@ def upsert_resource(api_token, filepath, resource_id=''):
     resposta_dict = json.loads(resultado.content)
     return resposta_dict
 
-def convert_shape_to_geojson(shapefile):
+
+def convert_shape(shapefile, driver="GeoJSON"):
+    drivers_extension = {
+        "GeoJSON": "geojson",
+        "CSV": "csv"
+    }
+
     d = geopandas.read_file(shapefile)
     d = d.set_crs("EPSG:31983") 
     new_projection = d.to_crs("EPSG:4326")
-    new_filename = shapefile.split('/')[-1].replace('shp', 'geojson')
+    new_filename = shapefile.split('/')[-1].replace('shp', drivers_extension[driver])
     new_filepath = os.path.join("/tmp", new_filename)
-    new_projection.to_file(new_filepath, driver="GeoJSON")
+    new_projection.to_file(new_filepath, driver=driver)
     return new_filepath
+
+formats = {
+        "geojson": lambda x: convert_shape(x, driver="GeoJSON"),
+        "shp": lambda x: x,
+        "csv": lambda x: convert_shape(x, driver="CSV")
+}
 
 for filename, resource_id in LAYERS.items():
     filepath = os.path.join(maps_folder_path, filename)
-    new_file = convert_shape_to_geojson(filepath)
-    upsert_resource(api_token, new_file, resource_id=resource_id)
+    for f in formats.keys():
+        new_file = formats[f](filepath)
+        upsert_resource(api_token, new_file, resource_id=resource_id)
