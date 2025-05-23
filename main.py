@@ -78,7 +78,7 @@ def convert_shape(shapefile, driver="GeoJSON"):
         "CSV": "csv"
     }
 
-    d = geopandas.read_file(shapefile)
+    d = geopandas.read_file(shapefile, encoding="UTF8")
     d = d.set_crs("EPSG:31983") 
     new_projection = d.to_crs("EPSG:4326")
     new_filename = shapefile.split('/')[-1].replace('shp', drivers_extension[driver])
